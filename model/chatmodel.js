@@ -9,7 +9,8 @@ const Schema = mongoose.Schema;
 const NewSchema = new Schema({
     username: String,
     room:String,
-    message: String
+    message: String,
+    img:String
 });
 
 const Chatdata = mongoose.model('chats', NewSchema);

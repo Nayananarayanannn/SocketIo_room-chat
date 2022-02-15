@@ -3,6 +3,7 @@ const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
 const userList = document.getElementById('users');
 
+
 // Get username and room from URL
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
@@ -27,6 +28,9 @@ socket.on('message', (message) => {
   // Scroll down
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
+socket.on('base64 file',(msg)=>{
+  outputImage(msg);
+})
 
 // Message submit
 chatForm.addEventListener('submit', (e) => {
@@ -36,6 +40,25 @@ chatForm.addEventListener('submit', (e) => {
   let msg = e.target.elements.msg.value;
 
   msg = msg.trim();
+  
+    var data = document.getElementById('img').files[0];
+    if(data !== undefined){
+      var reader = new FileReader();
+reader.readAsDataURL(data);
+
+reader.onload = function () {
+	console.log(reader.result);//base64encoded string
+  var mesgImg ={};
+  mesgImg.username = username;
+  mesgImg.file = reader.result;
+  mesgImg.fileName = data.name;
+  socket.emit('base64 file', mesgImg);
+};
+reader.onerror = function (error) {
+	console.log('Error: ', error);
+};
+    }
+
 
   if (!msg) {
     return false;
@@ -62,6 +85,22 @@ function outputMessage(message) {
   para.classList.add('text');
   para.innerText = message.text;
   div.appendChild(para);
+  document.querySelector('.chat-messages').appendChild(div);
+}
+
+function outputImage(message) {
+  const div = document.createElement('div');
+  div.classList.add('message');
+  const p = document.createElement('p');
+  p.classList.add('meta');
+  p.innerText = message.username;
+  p.innerHTML += `<span>${message.time}</span>`;
+  div.appendChild(p);
+  const img = document.createElement('img');
+  img.setAttribute('src',`${message.img}`);
+  img.style.width="200px";
+  img.style.height="120px";
+  div.appendChild(img);
   document.querySelector('.chat-messages').appendChild(div);
 }
 
